@@ -2,8 +2,8 @@ import md5 from 'js-md5'
 const blobSlice = (() => {
   return (
     File.prototype.slice ||
-        File.prototype.mozSlice ||
-        File.prototype.webkitSlice
+    File.prototype.mozSlice ||
+    File.prototype.webkitSlice
   )
 })()
 /**
@@ -12,7 +12,7 @@ const blobSlice = (() => {
  * @param {File} file 文件对象
  * @returns {string} md5File
  */
-export function MD5file (file) {
+export function MD5file(file) {
   return new Promise((resolve, reject) => {
     const fileReader = new FileReader()
     fileReader.readAsArrayBuffer(blobSlice.call(file))
@@ -29,7 +29,7 @@ export function MD5file (file) {
  * @param {*} val
  * @returns boolean
  */
-export function isObj (val) {
+export function isObj(val) {
   return val && typeof val === 'object' && val.toString() === '[object Object]'
 }
 /**
@@ -37,7 +37,7 @@ export function isObj (val) {
  * @param {*} fn
  * @returns boolean
  */
-export function isFn (fn) {
+export function isFn(fn) {
   return typeof fn === 'function'
 }
 /**
@@ -45,14 +45,14 @@ export function isFn (fn) {
  * @param {*} p
  * @returns {boolean}
  */
-export function isPromise (p) {
+export function isPromise(p) {
   return (isObj(p) || isFn(p)) && isFn(p.then)
 }
 /**
  * 是否是input元素
  */
-export function isInputElem (elem) {
-  return isObj(elem) && elem.nodeType === 1 && elem.nodeName === 'INPUT'
+export function isInputElem(elem) {
+  return elem && elem.nodeType === 1 && elem.nodeName === 'INPUT'
 }
 /**
  *文件分块
@@ -60,7 +60,7 @@ export function isInputElem (elem) {
  * @param {number} chunkSize 分块大小
  * @returns {Number}
  */
-export function sliceFile (file, chunkSize) {
+export function sliceFile(file, chunkSize) {
   if (file instanceof File) {
     const count = Math.ceil(file.size / chunkSize)
     const chunks = []
@@ -74,7 +74,7 @@ export function sliceFile (file, chunkSize) {
     return chunks
   }
 }
-export function upload (opts) {
+export function upload(opts) {
   // opts = {
   //   name: '',
   //   file: null,

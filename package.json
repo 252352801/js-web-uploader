@@ -1,0 +1,40 @@
+{
+  "name": "js-web-uploader",
+  "version": "0.1.0",
+  "description": "Javascript uploader for browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "build": "rollup --config build/rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/252352801/js-web-uploader.git"
+  },
+  "keywords": [
+    "uploader",
+    "upload",
+    "javascript",
+    "js"
+  ],
+  "author": "Qingyu Wei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/252352801/js-web-uploader/issues"
+  },
+  "homepage": "https://github.com/252352801/js-web-uploader#readme",
+  "dependencies": {
+    "js-md5": "^0.7.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/helpers": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.6",
+    "@rollup/plugin-commonjs": "^11.1.0",
+    "istanbul": "^0.4.5",
+    "rollup": "^2.10.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
+}

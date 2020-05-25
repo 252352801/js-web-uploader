@@ -1,4 +1,4 @@
-import { Chunk } from './chunk'
+import { FileChunk } from './file-chunk'
 import { MD5file, sliceFile } from './utils'
 import { UPLOAD_TYPE, QF_STATUS } from './consts'
 import { UploadEvent } from './upload-event'
@@ -68,13 +68,13 @@ export class QueueFile {
       if (wouldSlice) {
         this.chunks = (sliceFile(this.file, chunkSize) || []).map(
           (blob, index) => {
-            const chunk = new Chunk(blob, index, this)
+            const chunk = new FileChunk(blob, index, this)
             return chunk
           }
         )
       } else {
         //
-        this.chunks = [new Chunk(this.file, 0, this.file)]
+        this.chunks = [new FileChunk(this.file, 0, this.file)]
       }
       this.chunks.forEach(chunk => {
         this.subscribeChunkEvens(chunk)
@@ -84,7 +84,7 @@ export class QueueFile {
     }
     /**
      * 订阅分块对象的事件
-     * @param {Chunk} chunk
+     * @param {FileChunk} chunk
      */
     subscribeChunkEvens (chunk) {
       chunk.onProgress(ev => {
@@ -223,7 +223,7 @@ export class QueueFile {
     }
     /**
      * 并行上传
-     * @param {boolean} 是否从开始位置上传
+     * @param {boolean} isStart 是否从开始位置上传
      */
     concurrentUpload (isStart) {
       this.chunks.forEach(chunk => {
@@ -236,7 +236,7 @@ export class QueueFile {
     }
     /**
      * 串行上传
-     * @param {boolean} 是否从开始位置上传
+     * @param {boolean} isStart 是否从开始位置上传
      */
     serialUpload (isStart) {
       return new Promise(resolve => {

@@ -1,6 +1,6 @@
 import { UploadEvent } from './upload-event'
 import { isFn, isPromise, upload } from './utils'
-export class Chunk {
+export class FileChunk {
     queueFile
     index = 0
     blob
