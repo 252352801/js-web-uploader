@@ -1,11 +1,11 @@
-import { isFn} from './utils'
+import { isFn } from './utils'
 export class UploadEvent {
     handlersMap = {
     }
     // static events =[
     //   'select',
-    //   'onCountExceed',
-    //   'onSizeExceed',
+    //   'countExceed',
+    //   'sizeExceed',
     //   'beforeRemove',
     //   'remove',
     //   'beforeChunk',

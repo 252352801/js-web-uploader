@@ -1,6 +1,6 @@
 import { UploadEvent } from './upload-event'
 import { isFn, isPromise, upload } from './utils'
-export class FileChunk {
+export class Chunk {
     queueFile
     index = 0
     blob
@@ -51,6 +51,7 @@ export class FileChunk {
           chunkIndex: this.index
         }
         let data = isFn(opts.data) ? opts.data.call(this, info) : opts.data
+        let headers = isFn(opts.headers) ? opts.headers.call(this, info) : opts.headers
         // 判断是否是fn
         // 是则执行fn 得到结果res
         // 如果结果是一个promise 取promise结果;否则直接取res
@@ -62,7 +63,8 @@ export class FileChunk {
           ...opts,
           // file: this.blob,
           file: new File([this.blob], this.queueFile.file.name),
-          data: data,
+          data,
+          headers,
           progress: (ev) => {
             this.status =
             this.percent = this.computePercent(ev.total, ev.loaded)

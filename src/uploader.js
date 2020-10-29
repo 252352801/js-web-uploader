@@ -10,7 +10,7 @@ export class Uploader {
   queue = []
   /** 分块大小 */
   chunkSize = 0
-  /** 分块的上传方式 默认串行上传 */
+  /** 分块的上传方式 默认并发上传 */
   uploadType = UPLOAD_TYPE.concurrent
   /** 上传地址 */
   uploadUrl = ''
@@ -59,7 +59,7 @@ export class Uploader {
   hashMethod = null
   /** 检测上传状态的方法 传入参数（file） resolve状态列表 如[0,0,0,1,1,1] */
   checkMethod = null
-  constructor (opts) {
+  constructor(opts) {
     if (isObj(opts)) {
       for (let o in opts) {
         if (this.hasOwnProperty(o)) {
@@ -95,7 +95,7 @@ export class Uploader {
    * 初始化队列
    * @param {File[]} files 文件对象列表
    */
-  initQueue (files) {
+  initQueue(files) {
     const len = files.length > this.maxCount ? this.maxCount : files.length
     Array.prototype.forEach.call(files, (file, index) => {
       if (index >= len) return false
@@ -117,7 +117,7 @@ export class Uploader {
    *订阅队列文件的事件
    * @param {QueueFile} qf
    */
-  subscribeQueueFileEvents (qf) {
+  subscribeQueueFileEvents(qf) {
     const trigger = (evName) => (...args) => this.trigger(evName, ...args)
     qf.beforeChunk(trigger('beforeChunk'))
     qf.afterChunk(trigger('afterChunk'))
@@ -132,7 +132,7 @@ export class Uploader {
    * @param {string} evName
    * @param {function} action
    */
-  on (evName, action) {
+  on(evName, action) {
     this.uploadEvent.on(evName, action)
   }
   /**
@@ -140,102 +140,109 @@ export class Uploader {
    * @param {string} evName
    * @param  {...any} args
    */
-  trigger (evName, ...args) {
+  trigger(evName, ...args) {
     return this.uploadEvent.trigger(evName, ...args)
   }
   /**
    * 文件选定时
    * @param {function} fn
    */
-  onSelect (fn) {
+  onSelect(fn) {
     this.on('select', fn)
   }
   /**
    * 移除文件之前
    * @param {function} fn
    */
-  beforeRemove (fn) {
+  beforeRemove(fn) {
     this.on('beforeRemove', fn)
   }
   /**
    * 移除文件时
    * @param {function} fn
    */
-  onRemove (fn) {
+  onRemove(fn) {
     this.on('remove', fn)
   }
   /**
    * 上传文件之前
    * @param {function} fn
    */
-  beforeUpload (fn) {
+  beforeUpload(fn) {
     this.on('beforeUpload', fn)
   }
   /**
    * 上传成功时
    * @param {function} fn
    */
-  onSuccess (fn) {
+  onSuccess(fn) {
     this.on('success', fn)
   }
   /**
    * 上传文件失败时
    * @param {function} fn
    */
-  onError (fn) {
+  onError(fn) {
     this.on('error', fn)
   }
   /**
    * 文件超出数量时
    * @param {function} fn
    */
-  onCountExceed (fn) {
+  onCountExceed(fn) {
     this.on('countExceed', fn)
   }
   /**
    * 文件超出大小时
    * @param {function} fn
    */
-  onSizeExceed (fn) {
+  onSizeExceed(fn) {
     this.on('sizeExceed', fn)
   }
   /**
    * 上传文件进度
    * @param {function} fn
    */
-  onProgress (fn) {
+  onProgress(fn) {
     this.on('progress', fn)
   }
   /** 分片之前 */
-  beforeChunk (fn) {
+  beforeChunk(fn) {
     this.on('beforeChunk', fn)
   }
   /**
    * 分片之后
    * @param {function} fn
    */
-  afterChunk (fn) {
+  afterChunk(fn) {
     this.on('afterChunk', fn)
   }
   /**
    * hash之前
    * @param {function} fn
    */
-  beforeHash (fn) {
+  beforeHash(fn) {
     this.on('beforeHash', fn)
   }
   /**
    *hash之后
    * @param {*} fn
    */
-  afterHash (fn) {
+  afterHash(fn) {
     this.on('afterHash', fn)
+  }
+  setOptions(opts) {
+    Object.keys(opts).forEach(k => {
+      if (this.hasOwnProperty(k) && typeof opts[field] !== 'function') {
+        this[k] = opts[k]
+      }
+    })
   }
   /**
    * 触发事件后是否可继续
    * @param {*} res 触发后的返回结果
    */
-  async canContinueAfterTrigger (res) {
+  async canContinueAfterTrigger(res) {
     if (res instanceof Array) {
       const canContinueList = await Promise.all(res.map(r => {
         const val = isPromise(r) ? r : this.isContinue(r)
@@ -248,7 +255,7 @@ export class Uploader {
     return true
   }
   /** 提交 */
-  async upload () {
+  async upload() {
     const beforeUploadRes = this.trigger('beforeUpload', this.queue)
     const canContinue = await this.canContinueAfterTrigger(beforeUploadRes)
     if (!canContinue) return
@@ -264,7 +271,7 @@ export class Uploader {
   /**
    * 并行上传
    */
-  async concurrentUpload () {
+  async concurrentUpload() {
     this.queue.forEach(async qf => {
       // 生成hash值
       qf.upload()
@@ -273,7 +280,7 @@ export class Uploader {
   /**
    * 串行上传
    */
-  serialUpload () {
+  serialUpload() {
     const fn = async index => {
       const qf = this.queue[index]
       await qf.upload()
@@ -285,7 +292,7 @@ export class Uploader {
     fn(0)
   }
   /** 中断上传 */
-  abort () {
+  abort() {
     this.QueueFile.forEach(qf => {
       qf.abort()
     })
@@ -295,7 +302,7 @@ export class Uploader {
    * @param {*} returnVal
    * @returns {Boolean}
    */
-  async isContinue (returnVal) {
+  async isContinue(returnVal) {
     const invalidValues = [false, 0, '', null]
     return !invalidValues.some(val => val === returnVal)
   }
@@ -304,49 +311,78 @@ export class Uploader {
    * @param {File[]} files 文件列表
    * @returns {Boolean} 是否继续执行
    */
-  checkCountExceed (files) {
+  checkCountExceed(files) {
     const totalCount = files.length + this.queue.length
     if (this.maxCount && files.length && totalCount > this.maxCount) {
-      const action = this.handlers.countExceed
-      if (action === 'function') {
-        return this.isContinue(action.call(this, totalCount, this.maxCount, files))
-      }
+      this.trigger('countExceed', totalCount, this.maxCount)
+      return false
     }
     return true
   }
   /**
-   * 检测文件数量
+   * 检测单个文件大小
    * @param {File[]} files 文件列表
    * @returns {Boolean} 是否继续执行
    */
-  checkSizeExceed (files) {
+  checkSizeExceed(files) {
     if (!this.maxSize) return true
     const eFiles = files.filter(ele => ele.size > this.maxSize)
     if (eFiles.length) {
-      const action = this.handlers.sizeExceeded
-      if (action === 'function') {
-        return this.isContinue(action.call(this, eFiles, this.maxSize, files))
-      }
+      this.trigger('sizeExceed', eFiles, this.maxSize)
+      return false
     }
   }
   /**
    * 删除指定下标的队列文件
    * @param {number} index
    */
-  async remove (index) {
+  async remove(index) {
     const beforeRemoveRes = this.trigger('beforeRemove', this.queue)
     const canContinue = await this.canContinueAfterTrigger(beforeRemoveRes)
     if (canContinue) {
       this.queue.splice(index, 1)
+      this.trigger('remove', this.queue)
     }
   }
   /**
    * 设置上传方式
    * @param {*} val
    */
-  setUploadType (val) {
-    this.uploadType = val === 1 ? UPLOAD_TYPE.concurrent : UPLOAD_TYPE.serial
+  setUploadType(val) {
+    this.uploadType = +val
   }
 }
-// 最大并发数
-// 断线重连次数
+
+// export function reactive(data, callback) {
+//   function reactObj(obj, path) {
+//     if (Array.isArray(obj)) {
+//       // push shit unshit pop splice
+//       // 数组响应
+//     } else if (obj && typeof obj === 'object') {
+//       const keys = Object.keys(obj)
+//       keys.forEach(key => {
+//         let val = obj[key]
+//         if (!(Array.isArray(val) || (val && typeof val === 'object'))) {
+//           Object.defineProperty(obj, key, {
+//             get() {
+//               return val
+//             },
+//             set(newVal) {
+//               if (typeof callback === 'function') {
+//                 callback(data, path || key)
+//               }
+//               val = newVal
+//             }
+//           })
+//         } else {
+//           reactObj(val, path ? path + '.' + key : key)
+//         }
+//       })
+//     } else {
+//       return obj
+//     }
+//   }
+//   reactObj(data)
+//   data = null
+//   callback = null
+// }

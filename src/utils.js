@@ -1,4 +1,5 @@
-import md5 from 'js-md5'
+// import md5 from 'js-md5'
+let md5
 const blobSlice = (() => {
   return (
     File.prototype.slice ||
@@ -7,16 +8,20 @@ const blobSlice = (() => {
   )
 })()
 /**
- * 文件md5处理，返回值用于验证文件完整性
+ * md5计算文件hash值
  * @description 依赖 SparkMD5
  * @param {File} file 文件对象
- * @returns {string} md5File
+ * @returns {Promise<string>} file hash
  */
 export function MD5file(file) {
   return new Promise((resolve, reject) => {
     const fileReader = new FileReader()
     fileReader.readAsArrayBuffer(blobSlice.call(file))
     fileReader.onload = function (e) {
+      if (!md5) {
+        md5 = require('js-md5')
+      }
+      console.log('md5', md5)
       resolve(md5(e.target.result))
     }
     fileReader.onerror = function () {
@@ -46,7 +51,7 @@ export function isFn(fn) {
  * @returns {boolean}
  */
 export function isPromise(p) {
-  return (isObj(p) || isFn(p)) && isFn(p.then)
+  return p && ((typeof p === 'object' && isFn(p.then)) || p.toString() === '[object Promise]')
 }
 /**
  * 是否是input元素
